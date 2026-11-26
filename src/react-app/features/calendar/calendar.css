@@ -1,0 +1,97 @@
+.planner-calendar {
+  --fc-border-color: var(--border);
+  --fc-page-bg-color: var(--card);
+  --fc-neutral-bg-color: var(--muted);
+  --fc-list-event-hover-bg-color: var(--muted);
+
+  --fc-today-bg-color:
+    color-mix(in srgb, var(--primary) 12%, transparent);
+
+  --fc-button-text-color: var(--foreground);
+  --fc-button-bg-color: var(--background);
+  --fc-button-border-color: var(--border);
+
+  --fc-button-hover-bg-color: var(--muted);
+  --fc-button-hover-border-color: var(--border);
+
+  --fc-button-active-bg-color: var(--primary);
+  --fc-button-active-border-color: var(--primary);
+
+  color: var(--foreground);
+  font-size: 0.875rem;
+}
+
+.planner-calendar .fc-toolbar-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+}
+
+.planner-calendar .fc-button {
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  box-shadow: none;
+}
+
+.planner-calendar .fc-button-primary:not(:disabled).fc-button-active {
+  color: var(--primary-foreground);
+}
+
+.planner-calendar .fc-event {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 3px;
+  font-size: 0.75rem;
+}
+
+.planner-calendar .fc-daygrid-event {
+  overflow: hidden;
+}
+
+.planner-calendar .fc-col-header-cell-cushion,
+.planner-calendar .fc-daygrid-day-number {
+  color: var(--foreground);
+  text-decoration: none;
+}
+
+.planner-calendar .fc-scrollgrid {
+  border-color: var(--border);
+}
+
+.planner-calendar .fc-popover {
+  background: var(--card);
+  color: var(--foreground);
+}
+
+.planner-calendar .fc-popover-header {
+  background: var(--muted);
+}
+
+.planner-calendar .fc-timegrid-slot {
+  height: 3rem;
+}
+
+@media (max-width: 640px) {
+  .planner-calendar {
+    font-size: 0.7rem;
+  }
+
+  .planner-calendar .fc-toolbar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .planner-calendar .fc-toolbar-title {
+    font-size: 1rem;
+  }
+
+  .planner-calendar .fc-button {
+    padding: 0.4rem 0.6rem;
+    font-size: 0.7rem;
+  }
+
+  .planner-calendar .fc-event {
+    font-size: 0.65rem;
+  }
+}
