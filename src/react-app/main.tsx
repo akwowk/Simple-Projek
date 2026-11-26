@@ -8,10 +8,16 @@ import {
   PlannerProvider,
 } from "@/context/PlannerContext";
 
+import {
+  ThemeProvider,
+} from "@/context/ThemeContext";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <PlannerProvider>
-      <App />
-    </PlannerProvider>
+    <ThemeProvider>
+      <PlannerProvider>
+        <App />
+      </PlannerProvider>
+    </ThemeProvider>
   </StrictMode>
 );
