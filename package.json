@@ -1,6 +1,7 @@
 {
-	"name": "vite-react-template",
-	"description": "A template for building a React application with Vite, Hono, and Cloudflare Workers",
+	"name": "myplanner",
+	"version": "0.1.0",
+	"description": "Personal productivity workspace for managing schedules, tasks, and events",
 	"cloudflare": {
 		"label": "Vite React Template",
 		"products": [
