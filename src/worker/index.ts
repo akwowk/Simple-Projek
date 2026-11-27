@@ -1,118 +1,221 @@
 
 import { Hono } from "hono";
-import { count } from "drizzle-orm";
+import { HTTPException } from "hono/http-exception";
 
-import { createDb } from "./db";
+import type { AppEnv } from "./types";
 
-import {
-  subjects,
-  schedules,
-  tasks,
-  events,
-} from "./db/schema";
+import { databaseMiddleware } from "./middleware/database";
 
-type Bindings = {
-  DB: D1Database;
-};
+import { success, failure } from "./lib/response";
+import { ApiError } from "./lib/errors";
+import { nowISO } from "./lib/date";
 
-const app = new Hono<{
-  Bindings: Bindings;
-}>();
+import subjectRoutes from "./routes/subjects";
+import scheduleRoutes from "./routes/schedules";
+import taskRoutes from "./routes/tasks";
+import eventRoutes from "./routes/events";
+import dashboardRoutes from "./routes/dashboard";
+import calendarRoutes from "./routes/calendar";
+
+const app = new Hono<AppEnv>();
 
 
 // ================================
-// API HEALTH CHECK
+// GLOBAL MIDDLEWARE
+// ================================
+
+app.use("/api/*", async (c, next) => {
+  await next();
+
+  c.header(
+    "Cache-Control",
+    "no-store"
+  );
+
+  c.header(
+    "X-Content-Type-Options",
+    "nosniff"
+  );
+});
+
+app.use(
+  "/api/*",
+  databaseMiddleware
+);
+
+
+// ================================
+// HEALTH CHECK
 // ================================
 
 app.get("/api/health", (c) => {
-  return c.json({
-    success: true,
-    message: "MyPlanner API is running",
-    timestamp: new Date().toISOString(),
-  });
+  return c.json(
+    success(
+      {
+        name: "MyPlanner API",
+        version: "0.2.0",
+        timestamp: nowISO(),
+      },
+      "API is running"
+    )
+  );
 });
 
 
 // ================================
-// DATABASE HEALTH CHECK
+// REST API ROUTES
 // ================================
 
-app.get("/api/db/health", async (c) => {
-  try {
-    const db = createDb(c.env.DB);
+app.route(
+  "/api/subjects",
+  subjectRoutes
+);
 
-    // Jalankan query untuk memastikan
-    // koneksi database dan migration valid.
-    await db
-      .select({ total: count() })
-      .from(subjects);
+app.route(
+  "/api/schedules",
+  scheduleRoutes
+);
 
-    return c.json({
-      success: true,
-      message: "Database connected successfully",
-      database: "Cloudflare D1",
-      orm: "Drizzle ORM",
-      timestamp: new Date().toISOString(),
-    });
+app.route(
+  "/api/tasks",
+  taskRoutes
+);
 
-  } catch (error) {
-    console.error("Database health error:", error);
+app.route(
+  "/api/events",
+  eventRoutes
+);
 
-    return c.json(
-      {
-        success: false,
-        message: "Database connection failed",
-      },
-      500
-    );
-  }
+app.route(
+  "/api/dashboard",
+  dashboardRoutes
+);
+
+app.route(
+  "/api/calendar",
+  calendarRoutes
+);
+
+
+// ================================
+// NOT FOUND
+// ================================
+
+app.notFound((c) => {
+  return c.json(
+    failure(
+      "Endpoint tidak ditemukan",
+      "NOT_FOUND"
+    ),
+    404
+  );
 });
 
 
 // ================================
-// DEVELOPMENT DATABASE TEST
-// Hapus sebelum deployment publik.
+// GLOBAL ERROR HANDLER
 // ================================
 
-app.get("/api/db/test", async (c) => {
-  try {
-    const db = createDb(c.env.DB);
-
-    const [
-      subjectRows,
-      scheduleRows,
-      taskRows,
-      eventRows,
-    ] = await Promise.all([
-      db.select({ total: count() }).from(subjects),
-      db.select({ total: count() }).from(schedules),
-      db.select({ total: count() }).from(tasks),
-      db.select({ total: count() }).from(events),
-    ]);
-
-    return c.json({
-      success: true,
-      message: "Database query successful",
-
-      data: {
-        subjects: subjectRows[0]?.total ?? 0,
-        schedules: scheduleRows[0]?.total ?? 0,
-        tasks: taskRows[0]?.total ?? 0,
-        events: eventRows[0]?.total ?? 0,
-      },
-    });
-
-  } catch (error) {
-    console.error("Database test error:", error);
-
+app.onError((error, c) => {
+  if (error instanceof ApiError) {
     return c.json(
-      {
-        success: false,
-        message: "Failed to query database",
-      },
-      500
+      failure(
+        error.message,
+        error.code
+      ),
+      error.status
     );
   }
+
+  if (error instanceof HTTPException) {
+    return c.json(
+      failure(
+        error.status >= 500
+          ? "Terjadi kesalahan pada server"
+          : "Request tidak valid",
+        "HTTP_ERROR"
+      ),
+      error.status
+    );
+  }
+
+  if (error instanceof SyntaxError) {
+    return c.json(
+      failure(
+        "Format request tidak valid",
+        "INVALID_REQUEST"
+      ),
+      400
+    );
+  }
+
+  const messages: string[] = [];
+
+  let current: unknown = error;
+
+  for (
+    let i = 0;
+    i < 5 && current instanceof Error;
+    i++
+  ) {
+    messages.push(current.message);
+    current = current.cause;
+  }
+
+  const message = messages.join(" ");
+
+  if (
+    message.includes("SCHEDULE_CONFLICT")
+  ) {
+    return c.json(
+      failure(
+        "Jadwal bentrok dengan mata kuliah lain",
+        "SCHEDULE_CONFLICT"
+      ),
+      409
+    );
+  }
+
+  if (
+    message.includes(
+      "UNIQUE constraint failed"
+    )
+  ) {
+    return c.json(
+      failure(
+        "Data sudah tersedia",
+        "DUPLICATE_DATA"
+      ),
+      409
+    );
+  }
+
+  if (
+    message.includes(
+      "FOREIGN KEY constraint failed"
+    )
+  ) {
+    return c.json(
+      failure(
+        "Relasi data tidak valid",
+        "INVALID_REFERENCE"
+      ),
+      409
+    );
+  }
+
+  console.error(
+    "Unhandled API error:",
+    error
+  );
+
+  return c.json(
+    failure(
+      "Terjadi kesalahan pada server",
+      "INTERNAL_SERVER_ERROR"
+    ),
+    500
+  );
 });
 
 export default app;
