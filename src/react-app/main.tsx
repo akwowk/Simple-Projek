@@ -12,12 +12,18 @@ import {
   ThemeProvider,
 } from "@/context/ThemeContext";
 
+import {
+  AuthProvider,
+} from "@/context/AuthContext";
+
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      <PlannerProvider>
-        <App />
-      </PlannerProvider>
+      <AuthProvider>
+        <PlannerProvider>
+          <App />
+        </PlannerProvider>
+      </AuthProvider>
     </ThemeProvider>
   </StrictMode>
 );

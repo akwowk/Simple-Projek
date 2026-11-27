@@ -2,9 +2,14 @@ import { NavLink } from "react-router-dom";
 import { CalendarCheck } from "lucide-react";
 import { navigation } from "@/lib/navigation";
 import { cn } from "@/lib/utils";
+import {
+  useAuth,
+} from "@/context/AuthContext";
 
 export default function Sidebar() {
+  const { user } = useAuth();
   return (
+
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r bg-card md:flex">
 
       <div className="flex h-16 items-center gap-3 border-b px-6">
@@ -48,20 +53,32 @@ export default function Sidebar() {
       </div>
 
       <div className="border-t p-4">
+
         <div className="flex items-center gap-3">
-          <div className="flex size-10 items-center justify-center rounded-full bg-primary font-semibold">
-            M
+
+          <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary font-semibold text-primary-foreground">
+
+            {user?.email.charAt(0).toUpperCase() ?? "M"}
+
           </div>
 
-          <div>
-            <p className="text-sm font-medium">
-              My Account
+          <div className="min-w-0">
+
+            <p
+              className="truncate text-sm font-medium"
+              title={user?.email}
+            >
+              {user?.email}
             </p>
+
             <p className="text-xs text-muted-foreground">
-              Personal Planner
+              Personal Account
             </p>
+
           </div>
+
         </div>
+
       </div>
 
     </aside>

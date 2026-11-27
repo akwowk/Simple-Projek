@@ -58,6 +58,8 @@
 	},
 	"private": true,
 	"scripts": {
+		"auth:create-user": "node scripts/create-user.mjs",
+		"auth:create-user:remote": "node scripts/create-user.mjs --remote",
 		"build": "tsc -b && vite build",
 		"cf-typegen": "wrangler types",
 		"check": "tsc && vite build && wrangler deploy --dry-run",

@@ -17,6 +17,18 @@ import eventRoutes from "./routes/events";
 import dashboardRoutes from "./routes/dashboard";
 import calendarRoutes from "./routes/calendar";
 
+import { bodyLimit } from "hono/body-limit";
+
+import authRoutes from "./routes/auth";
+
+import {
+  authMiddleware,
+} from "./middleware/auth";
+
+import {
+  csrfMiddleware,
+} from "./middleware/csrf";
+
 const app = new Hono<AppEnv>();
 
 
@@ -43,6 +55,28 @@ app.use(
   databaseMiddleware
 );
 
+app.use(
+  "/api/*",
+  bodyLimit({
+    maxSize: 32 * 1024,
+
+    onError: (c) => {
+      return c.json(
+        failure(
+          "Ukuran request terlalu besar",
+          "PAYLOAD_TOO_LARGE"
+        ),
+        413
+      );
+    },
+  })
+);
+
+app.use(
+  "/api/*",
+  csrfMiddleware
+);
+
 
 // ================================
 // HEALTH CHECK
@@ -59,6 +93,26 @@ app.get("/api/health", (c) => {
       "API is running"
     )
   );
+});
+
+app.route(
+  "/api/auth",
+  authRoutes
+);
+
+app.use("/api/*", async (c, next) => {
+  const path = c.req.path;
+
+  if (
+    path === "/api/health" ||
+    path === "/api/auth" ||
+    path.startsWith("/api/auth/")
+  ) {
+    await next();
+    return;
+  }
+
+  return authMiddleware(c, next);
 });
 
 

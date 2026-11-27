@@ -1,10 +1,18 @@
+
 import {
   BrowserRouter,
   Routes,
   Route,
 } from "react-router-dom";
 
-import AppLayout from "@/components/layout/AppLayout";
+import AppLayout from
+  "@/components/layout/AppLayout";
+
+import ProtectedRoute from
+  "@/features/auth/ProtectedRoute";
+
+import GuestRoute from
+  "@/features/auth/GuestRoute";
 
 import Dashboard from "@/pages/Dashboard";
 import Schedule from "@/pages/Schedule";
@@ -25,44 +33,56 @@ function AppRoutes() {
   return (
     <Routes>
 
-      <Route
-        path="/login"
-        element={<Login />}
-      />
+      {/* Guest routes */}
 
-      <Route element={<AppLayout />}>
-
-        <Route index element={<Dashboard />} />
+      <Route element={<GuestRoute />}>
 
         <Route
-          path="/schedule"
-          element={<Schedule />}
+          path="/login"
+          element={<Login />}
         />
 
-        <Route
-          path="/tasks"
-          element={<Tasks />}
-        />
+      </Route>
 
-        <Route
-          path="/events"
-          element={<Events />}
-        />
+      {/* Protected routes */}
 
-        <Route
-          path="/calendar"
-          element={<Calendar />}
-        />
+      <Route element={<ProtectedRoute />}>
 
-        <Route
-          path="/settings"
-          element={<Settings />}
-        />
+        <Route element={<AppLayout />}>
 
-        <Route
-          path="*"
-          element={<NotFound />}
-        />
+          <Route index element={<Dashboard />} />
+
+          <Route
+            path="/schedule"
+            element={<Schedule />}
+          />
+
+          <Route
+            path="/tasks"
+            element={<Tasks />}
+          />
+
+          <Route
+            path="/events"
+            element={<Events />}
+          />
+
+          <Route
+            path="/calendar"
+            element={<Calendar />}
+          />
+
+          <Route
+            path="/settings"
+            element={<Settings />}
+          />
+
+          <Route
+            path="*"
+            element={<NotFound />}
+          />
+
+        </Route>
 
       </Route>
 

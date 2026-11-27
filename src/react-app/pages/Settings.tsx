@@ -1,9 +1,7 @@
-
 import {
   Palette,
   Globe,
   Bell,
-  Shield,
   Info,
 } from "lucide-react";
 
@@ -18,15 +16,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-import { Link } from "react-router-dom";
-
-import ThemeSelector from
-  "@/features/settings/ThemeSelector";
+import ThemeSelector from "@/features/settings/ThemeSelector";
+import AccountSettings from "@/features/auth/AccountSettings";
 
 export default function Settings() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-
       <section>
         <h1 className="text-2xl font-bold tracking-tight">
           Pengaturan
@@ -38,10 +33,8 @@ export default function Settings() {
       </section>
 
       {/* Appearance */}
-
       <Card>
         <CardHeader>
-
           <CardTitle className="flex items-center gap-2">
             <Palette size={20} />
             Tampilan
@@ -50,7 +43,6 @@ export default function Settings() {
           <CardDescription>
             Pilih tema yang sesuai dengan preferensimu.
           </CardDescription>
-
         </CardHeader>
 
         <CardContent>
@@ -59,10 +51,8 @@ export default function Settings() {
       </Card>
 
       {/* Preferences */}
-
       <Card>
         <CardHeader>
-
           <CardTitle className="flex items-center gap-2">
             <Globe size={20} />
             Preferensi
@@ -71,13 +61,10 @@ export default function Settings() {
           <CardDescription>
             Konfigurasi bahasa dan waktu aplikasi.
           </CardDescription>
-
         </CardHeader>
 
         <CardContent className="space-y-4">
-
           <div className="flex items-center justify-between gap-3 border-b pb-4">
-
             <div>
               <p className="text-sm font-medium">
                 Bahasa
@@ -91,11 +78,9 @@ export default function Settings() {
             <Badge variant="secondary">
               Indonesia
             </Badge>
-
           </div>
 
           <div className="flex items-center justify-between gap-3">
-
             <div>
               <p className="text-sm font-medium">
                 Zona Waktu
@@ -109,17 +94,13 @@ export default function Settings() {
             <Badge variant="secondary">
               WIB (UTC+7)
             </Badge>
-
           </div>
-
         </CardContent>
       </Card>
 
       {/* Notifications */}
-
       <Card>
         <CardHeader>
-
           <CardTitle className="flex items-center gap-2">
             <Bell size={20} />
             Notifikasi
@@ -128,13 +109,10 @@ export default function Settings() {
           <CardDescription>
             Pengingat otomatis melalui Telegram.
           </CardDescription>
-
         </CardHeader>
 
         <CardContent className="space-y-4">
-
           <div className="flex flex-wrap items-center justify-between gap-3">
-
             <div>
               <p className="text-sm font-medium">
                 Telegram Bot
@@ -148,7 +126,6 @@ export default function Settings() {
             <Badge variant="outline">
               Belum aktif
             </Badge>
-
           </div>
 
           <div className="rounded-lg border border-dashed p-4 text-sm text-muted-foreground">
@@ -162,57 +139,22 @@ export default function Settings() {
           >
             Hubungkan Telegram
           </Button>
-
         </CardContent>
       </Card>
 
       {/* Account */}
-
-      <Card>
-        <CardHeader>
-
-          <CardTitle className="flex items-center gap-2">
-            <Shield size={20} />
-            Akun dan Keamanan
-          </CardTitle>
-
-          <CardDescription>
-            Pengaturan akses personal workspace.
-          </CardDescription>
-
-        </CardHeader>
-
-        <CardContent className="space-y-3">
-
-          <p className="text-sm text-muted-foreground">
-            Autentikasi belum diaktifkan.
-            Aplikasi masih dalam tahap pengembangan.
-          </p>
-
-          <Link
-            to="/login"
-            className="inline-flex rounded-md border px-4 py-2 text-sm font-medium hover:bg-muted"
-          >
-            Preview Halaman Login
-          </Link>
-
-        </CardContent>
-      </Card>
+      <AccountSettings />
 
       {/* About */}
-
       <Card>
         <CardHeader>
-
           <CardTitle className="flex items-center gap-2">
             <Info size={20} />
             Tentang Aplikasi
           </CardTitle>
-
         </CardHeader>
 
         <CardContent className="space-y-2">
-
           <p className="font-semibold">
             MyPlanner
           </p>
@@ -224,10 +166,8 @@ export default function Settings() {
           <p className="text-xs text-muted-foreground">
             Version 0.1.0 — Development
           </p>
-
         </CardContent>
       </Card>
-
     </div>
   );
 }

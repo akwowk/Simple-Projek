@@ -1,18 +1,23 @@
 
-import { useState } from "react";
+import {
+  useState,
+} from "react";
+
 import type { FormEvent } from "react";
 
 import {
   CalendarCheck,
   Eye,
   EyeOff,
-  ArrowLeft,
   ShieldCheck,
+  LoaderCircle,
+  AlertCircle,
 } from "lucide-react";
 
-import { Link } from "react-router-dom";
+import {
+  Button,
+} from "@/components/ui/button";
 
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
@@ -24,8 +29,15 @@ import {
   CardContent,
 } from "@/components/ui/card";
 
+import {
+  useAuth,
+} from "@/context/AuthContext";
+
 export default function Login() {
-  const [email, setEmail] = useState("");
+  const { login } = useAuth();
+
+  const [email, setEmail] =
+    useState("");
 
   const [password, setPassword] =
     useState("");
@@ -33,17 +45,40 @@ export default function Login() {
   const [showPassword, setShowPassword] =
     useState(false);
 
-  const [message, setMessage] =
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
     useState("");
 
-  function handleSubmit(
+  async function handleSubmit(
     e: FormEvent<HTMLFormElement>
   ) {
     e.preventDefault();
 
-    setMessage(
-      "Autentikasi belum tersedia. Fitur login akan diaktifkan pada Phase 4."
-    );
+    if (loading) return;
+
+    setError("");
+    setLoading(true);
+
+    try {
+      await login(
+        email,
+        password
+      );
+
+      setPassword("");
+
+    } catch (err) {
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Login gagal"
+      );
+
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -57,19 +92,18 @@ export default function Login() {
             <CalendarCheck size={32} />
           </div>
 
-          <div>
-            <h1 className="text-2xl font-bold">
-              MyPlanner
-            </h1>
+          <h1 className="text-2xl font-bold">
+            MyPlanner
+          </h1>
 
-            <p className="mt-1 text-sm text-muted-foreground">
-              Personal Productivity Workspace
-            </p>
-          </div>
+          <p className="text-sm text-muted-foreground">
+            Personal Productivity Workspace
+          </p>
 
         </div>
 
         <Card>
+
           <CardHeader>
 
             <CardTitle className="text-xl">
@@ -85,11 +119,12 @@ export default function Login() {
           <CardContent>
 
             <form
-              onSubmit={handleSubmit}
               className="space-y-4"
+              onSubmit={handleSubmit}
             >
 
               <div className="space-y-2">
+
                 <Label htmlFor="email">
                   Email
                 </Label>
@@ -97,20 +132,22 @@ export default function Login() {
                 <Input
                   id="email"
                   type="email"
-                  placeholder="email@example.com"
                   autoComplete="username"
+                  placeholder="email@example.com"
                   value={email}
+                  disabled={loading}
                   onChange={(e) =>
                     setEmail(e.target.value)
                   }
                   required
                 />
+
               </div>
 
               <div className="space-y-2">
 
                 <Label htmlFor="password">
-                  Password
+                  Access Key
                 </Label>
 
                 <div className="relative">
@@ -122,10 +159,13 @@ export default function Login() {
                         ? "text"
                         : "password"
                     }
-                    className="pr-12"
                     autoComplete="current-password"
-                    placeholder="Masukkan password"
+                    autoCapitalize="none"
+                    spellCheck={false}
+                    placeholder="Masukkan access key"
+                    className="pr-11"
                     value={password}
+                    disabled={loading}
                     onChange={(e) =>
                       setPassword(e.target.value)
                     }
@@ -134,15 +174,17 @@ export default function Login() {
 
                   <button
                     type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                     aria-label={
                       showPassword
-                        ? "Sembunyikan password"
-                        : "Tampilkan password"
+                        ? "Sembunyikan access key"
+                        : "Tampilkan access key"
                     }
                     onClick={() =>
-                      setShowPassword(!showPassword)
+                      setShowPassword(
+                        !showPassword
+                      )
                     }
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                   >
                     {showPassword
                       ? <EyeOff size={18} />
@@ -150,45 +192,56 @@ export default function Login() {
                   </button>
 
                 </div>
+
               </div>
 
-              {message && (
-                <p
-                  role="status"
-                  className="rounded-lg bg-muted p-3 text-sm text-muted-foreground"
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive"
                 >
-                  {message}
-                </p>
+                  <AlertCircle
+                    size={18}
+                    className="shrink-0"
+                  />
+
+                  {error}
+
+                </div>
               )}
 
               <Button
                 type="submit"
                 className="w-full"
+                disabled={loading}
               >
-                Masuk
+                {loading ? (
+                  <>
+                    <LoaderCircle
+                      size={16}
+                      className="animate-spin"
+                    />
+
+                    Sedang masuk...
+                  </>
+                ) : (
+                  "Masuk"
+                )}
               </Button>
 
             </form>
 
           </CardContent>
+
         </Card>
 
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <ShieldCheck size={15} />
+
+          <ShieldCheck size={16} />
+
           Private Personal Workspace
+
         </div>
-
-        <Link
-          to="/"
-          className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft size={16} />
-          Kembali ke Dashboard
-        </Link>
-
-        <p className="text-center text-xs text-muted-foreground">
-          Development preview — belum menggunakan autentikasi.
-        </p>
 
       </div>
 
